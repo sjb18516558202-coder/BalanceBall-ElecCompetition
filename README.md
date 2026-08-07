@@ -1,0 +1,2 @@
+# BalanceBall-ElecCompetition
+2026电赛H题车载平衡滚球运动控制系统，MSPM0G3507嵌入式固件、机器视觉、强化学习、Altium硬件PCB、3D打印结构全套工程
