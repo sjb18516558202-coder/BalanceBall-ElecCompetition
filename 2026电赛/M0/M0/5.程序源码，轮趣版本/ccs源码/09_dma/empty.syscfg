@@ -1,0 +1,66 @@
+/**
+ * These arguments were used when this file was generated. They will be automatically applied on subsequent loads
+ * via the GUI or CLI. Run CLI with '--help' for additional information on how to override these arguments.
+ * @cliArgs --device "MSPM0G350X" --part "Default" --package "LQFP-64(PM)" --product "mspm0_sdk@2.02.00.05"
+ * @v2CliArgs --device "MSPM0G3507" --package "LQFP-64(PM)" --product "mspm0_sdk@2.02.00.05"
+ * @versions {"tool":"1.21.1+3772"}
+ */
+
+/**
+ * Import the modules used in this configuration.
+ */
+const ADC12  = scripting.addModule("/ti/driverlib/ADC12", {}, false);
+const ADC121 = ADC12.addInstance();
+const SYSCTL = scripting.addModule("/ti/driverlib/SYSCTL");
+const UART   = scripting.addModule("/ti/driverlib/UART", {}, false);
+const UART1  = UART.addInstance();
+
+/**
+ * Write custom configuration values to the imported modules.
+ */
+const gate7  = system.clockTree["MFCLKGATE"];
+gate7.enable = true;
+
+ADC121.$name                             = "ADC_VOLTAGE";
+ADC121.sampClkDiv                        = "DL_ADC12_CLOCK_DIVIDE_8";
+ADC121.repeatMode                        = true;
+ADC121.adcMem0_name                      = "ADC_CH0";
+ADC121.sampleTime0                       = "100 us";
+ADC121.configureDMA                      = true;
+ADC121.sampCnt                           = 1;
+ADC121.enabledDMATriggers                = ["DL_ADC12_DMA_MEM0_RESULT_LOADED"];
+ADC121.peripheral.$assign                = "ADC0";
+ADC121.peripheral.adcPin0.$assign        = "PA27";
+ADC121.adcPin0Config.$name               = "ti_driverlib_gpio_GPIOPinGeneric2";
+ADC121.adcPin0Config.hideOutputInversion = scripting.forceWrite(false);
+ADC121.DMA_CHANNEL.$name                 = "DMA_CH0";
+ADC121.DMA_CHANNEL.addressMode           = "f2b";
+ADC121.DMA_CHANNEL.srcLength             = "HALF_WORD";
+ADC121.DMA_CHANNEL.dstLength             = "HALF_WORD";
+ADC121.DMA_CHANNEL.configureTransferSize = true;
+ADC121.DMA_CHANNEL.transferSize          = 10;
+ADC121.DMA_CHANNEL.transferMode          = "FULL_CH_REPEAT_SINGLE";
+
+const Board = scripting.addModule("/ti/driverlib/Board", {}, false);
+
+SYSCTL.forceDefaultClkConfig = true;
+SYSCTL.clockTreeEn           = true;
+
+UART1.$name                    = "UART_0";
+UART1.uartClkSrc               = "MFCLK";
+UART1.enabledInterrupts        = ["RX"];
+UART1.peripheral.rxPin.$assign = "PA11";
+UART1.peripheral.txPin.$assign = "PA10";
+UART1.txPinConfig.$name        = "ti_driverlib_gpio_GPIOPinGeneric0";
+UART1.rxPinConfig.$name        = "ti_driverlib_gpio_GPIOPinGeneric1";
+
+/**
+ * Pinmux solution for unlocked pins/peripherals. This ensures that minor changes to the automatic solver in a future
+ * version of the tool will not impact the pinmux you originally saw.  These lines can be completely deleted in order to
+ * re-solve from scratch.
+ */
+ADC121.DMA_CHANNEL.peripheral.$suggestSolution = "DMA_CH0";
+Board.peripheral.$suggestSolution              = "DEBUGSS";
+Board.peripheral.swclkPin.$suggestSolution     = "PA20";
+Board.peripheral.swdioPin.$suggestSolution     = "PA19";
+UART1.peripheral.$suggestSolution              = "UART0";

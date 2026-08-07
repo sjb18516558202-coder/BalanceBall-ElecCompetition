@@ -1,0 +1,129 @@
+<html>
+<body>
+<pre>
+<h1>�Vision Build Log</h1>
+<h2>Tool Versions:</h2>
+IDE-Version: �Vision V5.39.0.0
+Copyright (C) 2023 ARM Ltd and ARM Germany GmbH. All rights reserved.
+License Information: 11 abc, 1, LIC=----
+ 
+Tool Versions:
+Toolchain:       MDK-Lite  Version: 5.39.0.0
+Toolchain Path:  D:\Keil_v5\ARM\ARMCLANG\Bin
+C Compiler:      ArmClang.exe V6.21
+Assembler:       Armasm.exe V6.21
+Linker/Locator:  ArmLink.exe V6.21
+Library Manager: ArmAr.exe V6.21
+Hex Converter:   FromElf.exe V6.21
+CPU DLL:         SARMCM3.DLL V5.39.0.0
+Dialog DLL:      DARMCM1.DLL V1.19.6.0
+Target DLL:      CMSIS_AGDI.dll V1.33.16.0
+Dialog DLL:      TARMCM1.DLL V1.14.6.0
+ 
+<h2>Project:</h2>
+D:\ti\mspm0_sdk_2_02_00_05\11_SPI\keil\LCD_SPI.uvprojx
+Project File Date:  11/29/2024
+
+<h2>Output:</h2>
+*** Using Compiler 'V6.21', folder: 'D:\Keil_v5\ARM\ARMCLANG\Bin'
+Rebuild target 'MSPM0G3507_Project'
+Before Build - User command #1: cmd.exe /C "D:\ti\mspm0_sdk_2_02_00_05\11_SPI\keil\../../tools/keil/syscfg.bat 'D:\ti\mspm0_sdk_2_02_00_05\11_SPI\keil\' empty.syscfg"
+Using Sysconfig Tool from "D:\ti\sysconfig_1.21.1\sysconfig_cli.bat"
+"Update the file located at <sdk path>/tools/keil/syscfg.bat to use a different version"
+Running script...
+Validating...
+info: SPI(/ti/driverlib/SPI): Peripheral does not retain register contents in STOP or STANDBY modes. User should take care to save and restore register configuration in application. See Retention Configuration section for more details.
+Generating Code (empty.syscfg)...
+Unchanged D:\ti\mspm0_sdk_2_02_00_05\11_SPI\ti_msp_dl_config.c...
+Unchanged D:\ti\mspm0_sdk_2_02_00_05\11_SPI\ti_msp_dl_config.h...
+Unchanged D:\ti\mspm0_sdk_2_02_00_05\11_SPI\Event.dot...
+compiling dl_aesadv.c...
+compiling dl_common.c...
+compiling dl_adc12.c...
+compiling dl_aes.c...
+assembling startup_mspm0g350x_uvision.s...
+compiling ti_msp_dl_config.c...
+compiling board.c...
+../empty.c(30): warning: passing 'char[8]' to parameter of type 'uint8_t *' (aka 'unsigned char *') converts between pointers to integer types where one is of the unique plain 'char' type and the other is not [-Wpointer-sign]
+   30 |         W25Q32_write("Yahboom", 0, 7);
+      |                      ^~~~~~~~~
+../BSP\bsp_spi.h(15): note: passing argument to parameter 'buffer' here
+   15 | void W25Q32_write(uint8_t* buffer, uint32_t addr, uint16_t numbyte);      //W25Q32д<CA><FD><BE><DD> W25Q32 write data
+      |                            ^
+../empty.c(44): warning: passing 'char[7]' to parameter of type 'const uint8_t *' (aka 'const unsigned char *') converts between pointers to integer types where one is of the unique plain 'char' type and the other is not [-Wpointer-sign]
+   44 |         LCD_ShowString(10,0,"Hello!",BLACK,WHITE,16,0);
+      |                             ^~~~~~~~
+../BSP/lcd.h(19): note: passing argument to parameter 'p' here
+   19 | void LCD_ShowString(uint16_t x,uint16_t y,const uint8_t *p,uint16_t fc,uint16_t bc,uint8_t sizey,uint8_t mode);//<CF><D4>ʾ<D7>ַ<FB><B4><AE> Display String
+      |                                                          ^
+../empty.c(45): warning: illegal character encoding in string literal [-Winvalid-source-encoding]
+   45 |         LCD_ShowChinese(50,20,"<D1>ǲ<A9><D6><C7><C4><DC>",BLACK,WHITE,16,0);
+      |                                ^~~~ ~~~~~~~~~~~~~~~~~~~~
+../empty.c(45): warning: passing 'char[9]' to parameter of type 'uint8_t *' (aka 'unsigned char *') converts between pointers to integer types where one is of the unique plain 'char' type and the other is not [-Wpointer-sign]
+   45 |         LCD_ShowChinese(50,20,"<D1>ǲ<A9><D6><C7><C4><DC>",BLACK,WHITE,16,0);
+      |                               ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+../BSP/lcd.h(12): note: passing argument to parameter 's' here
+   12 | void LCD_ShowChinese(uint16_t x,uint16_t y,uint8_t *s,uint16_t fc,uint16_t bc,uint8_t sizey,uint8_t mode);//<CF><D4>ʾ<BA><BA><D7>ִ<AE> Display Chinese character string
+      |                                                     ^
+../empty.c(52): warning: passing 'char[2]' to parameter of type 'const uint8_t *' (aka 'const unsigned char *') converts between pointers to integer types where one is of the unique plain 'char' type and the other is not [-Wpointer-sign]
+   52 |         LCD_ShowString(x, 36, str,BLACK, WHITE, 16, 0);  // <CF><D4>ʾ<D7>ַ<FB> Display Characters
+      |                               ^~~
+../BSP/lcd.h(19): note: passing argument to parameter 'p' here
+   19 | void LCD_ShowString(uint16_t x,uint16_t y,const uint8_t *p,uint16_t fc,uint16_t bc,uint8_t sizey,uint8_t mode);//<CF><D4>ʾ<D7>ַ<FB><B4><AE> Display String
+      |                                                          ^
+5 warnings generated.
+compiling empty.c...
+compiling bsp_spi.c...
+../BSP/lcd.c(3): warning: In file included from...
+../BSP/lcdfont.h(407): warning: illegal character encoding in string literal [-Winvalid-source-encoding]
+  407 | "<D1><C7>",0x00,0x00,0xFE,0x3F,0x20,0x02,0x20,0x02,0x20,0x02,0x20,0x02,0x22,0x22,0x24,0x22,
+      |  ^~~~~~~~
+../BSP/lcdfont.h(411): warning: illegal character encoding in string literal [-Winvalid-source-encoding]
+  411 | "<B2><A9>",0x04,0x0A,0x04,0x12,0xF4,0x7F,0x04,0x02,0xE4,0x3F,0x3F,0x22,0xE4,0x3F,0x24,0x22,
+      |  ^~~~~~~~
+../BSP/lcdfont.h(415): warning: illegal character encoding in string literal [-Winvalid-source-encoding]
+  415 | "<D6><C7>",0x04,0x00,0x7C,0x3E,0x12,0x22,0x10,0x22,0xFF,0x22,0x28,0x22,0x44,0x3E,0x02,0x00,
+      |  ^~~~~~~~
+../BSP/lcdfont.h(419): warning: illegal character encoding in string literal [-Winvalid-source-encoding]
+  419 | "<C4><DC>",0x08,0x02,0x24,0x22,0x42,0x12,0xFF,0x0E,0x80,0x02,0x00,0x42,0x7E,0x42,0x42,0x7C,
+      |  ^~~~~~~~
+4 warnings generated.
+compiling lcd.c...
+compiling lcd_init.c...
+compiling dl_i2c.c...
+compiling dl_lcd.c...
+compiling dl_lfss.c...
+compiling dl_keystorectl.c...
+compiling dl_crcp.c...
+compiling dl_mathacl.c...
+compiling dl_dma.c...
+compiling dl_crc.c...
+compiling dl_dac12.c...
+compiling dl_flashctl.c...
+compiling dl_mcan.c...
+compiling dl_trng.c...
+compiling dl_opa.c...
+compiling dl_vref.c...
+compiling dl_uart.c...
+compiling dl_spi.c...
+compiling dl_rtc_common.c...
+compiling dl_timer.c...
+linking...
+Program Size: Code=11152 RO-data=20672 RW-data=0 ZI-data=608  
+FromELF: creating hex file...
+".\Objects\LCD_SPI.axf" - 0 Error(s), 9 Warning(s).
+
+<h2>Software Packages used:</h2>
+
+Package Vendor: TexasInstruments
+                https://software-dl.ti.com/msp430/esd/MSPM0-CMSIS/MSPM0G1X0X_G3X0X/latest/exports/TexasInstruments.MSPM0G1X0X_G3X0X_DFP.1.3.1.pack
+                TexasInstruments::MSPM0G1X0X_G3X0X_DFP@1.3.1
+                Device Family Pack for Texas Instruments MSPM0G1X0X_G3X0X Series
+
+<h2>Collection of Component include folders:</h2>
+
+<h2>Collection of Component Files used:</h2>
+Build Time Elapsed:  00:00:11
+</pre>
+</body>
+</html>

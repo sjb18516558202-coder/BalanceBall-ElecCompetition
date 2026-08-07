@@ -1,0 +1,185 @@
+ICM20602 滤波调用教程（中文注释版）
+============================================================
+适用对象：平装小车、麦轮车、差速车、需要短时间转角控制的小车。
+核心目标：滤波后的姿态数据直接给电机控制/路径控制调用，不再直接使用原始 gyro/acc。
+
+一、程序初始化顺序
+------------------------------------------------------------
+1. 初始化系统时钟和串口：
+
+    clock_init(SYSTEM_CLOCK_80M);
+    debug_init();
+
+2. 初始化屏幕，可选：
+
+    ips200_init(IPS200_TYPE_SPI);
+    ips200_set_dir(IPS200_CROSSWISE);
+
+3. 初始化 ICM20602 底层驱动：
+
+    while(icm20602_init())
+    {
+        // 初始化失败时，检查 VCC、GND、SCLK、MOSI、MISO、CS。
+    }
+
+4. 初始化滤波模块：
+
+    icm20602_filter_init();
+
+5. 上电静止校准：
+
+    // 800次 × 5ms ≈ 4秒。
+    // 校准期间小车必须静止，否则后面Yaw会明显漂。
+    icm20602_filter_calibrate(800);
+
+6. 开启5ms定时器更新滤波：
+
+    // 回调函数中只调用滤波，不要刷屏、printf或做复杂电机控制。
+    pit_ms_init(PIT_TIM_G0, ICM20602_FILTER_PERIOD_MS, icm20602_filter_timer_callback, NULL);
+
+
+二、定时器回调写法
+------------------------------------------------------------
+static volatile uint32 imu_update_count = 0;
+static volatile uint8 imu_filter_enable = 0;
+
+static void icm20602_filter_timer_callback(uint32 event, void *ptr)
+{
+    (void)event;
+    (void)ptr;
+
+    if(imu_filter_enable)
+    {
+        // 固定5ms更新一次，Yaw积分才准确。
+        icm20602_filter_update(ICM20602_FILTER_DT);
+        imu_update_count ++;
+    }
+}
+
+
+三、小车运行时应该读取哪些值
+------------------------------------------------------------
+1. 水平安装，小车原地转向/转90度：
+
+    float yaw = icm20602_filter_data.yaw_deg;
+
+2. 判断当前是否还在旋转：
+
+    float yaw_rate = icm20602_filter_data.yaw_rate_dps;
+
+3. 做转向速度反馈：
+
+    float gz = icm20602_filter_data.gz_dps;
+
+4. 判断车身左右倾斜、前后俯仰：
+
+    float roll  = icm20602_filter_data.roll_deg;
+    float pitch = icm20602_filter_data.pitch_deg;
+
+5. 判断震动和静止状态：
+
+    uint8 vibration = icm20602_filter_data.vibration_flag;
+    uint8 is_static = icm20602_filter_data.static_flag;
+
+
+四、手动测试转90度
+------------------------------------------------------------
+// 把当前方向清零。
+icm20602_filter_reset_yaw();
+
+// 然后水平旋转模块或小车。
+// 屏幕上的 Yaw 或 icm20602_filter_data.yaw_deg 应该接近 90 或 -90。
+float yaw = icm20602_filter_data.yaw_deg;
+
+注意：
+1. ICM20602没有磁力计，Yaw是陀螺仪积分角度，只适合短时间相对转角。
+2. 每次测试转90度之前，建议先调用 icm20602_filter_reset_yaw()。
+3. 如果固定比例偏小/偏大，可用 icm20602_filter_set_yaw_scale() 微调。
+
+
+五、电机闭环转90度调用例程
+------------------------------------------------------------
+#define TURN_PWM_MAX   (3000)       // 按你的电机PWM范围修改
+
+void car_turn_90_example(void)
+{
+    float turn;
+
+    // 正90度和负90度代表两个方向。
+    icm20602_filter_yaw_turn_start(90.0f);
+
+    while(!icm20602_filter_yaw_turn_is_done())
+    {
+        // 返回值范围：-1.0 ~ 1.0。
+        turn = icm20602_filter_yaw_turn_update();
+
+        // 下面两个函数名只是示例，需要替换成你自己工程里的电机控制函数。
+        // 如果小车方向反了，把正负号对调即可。
+        motor_left_set_speed ((int16)(-turn * TURN_PWM_MAX));
+        motor_right_set_speed((int16)( turn * TURN_PWM_MAX));
+    }
+
+    motor_left_set_speed(0);
+    motor_right_set_speed(0);
+}
+
+
+六、接麦轮/四轮差速车时怎么用
+------------------------------------------------------------
+1. 差速车原地旋转：
+
+    左轮PWM = -turn * TURN_PWM_MAX;
+    右轮PWM =  turn * TURN_PWM_MAX;
+
+2. 四轮车原地旋转：
+
+    左前 = -turn * TURN_PWM_MAX;
+    左后 = -turn * TURN_PWM_MAX;
+    右前 =  turn * TURN_PWM_MAX;
+    右后 =  turn * TURN_PWM_MAX;
+
+3. 麦轮车原地旋转：
+
+    左前 = -turn * TURN_PWM_MAX;
+    左后 = -turn * TURN_PWM_MAX;
+    右前 =  turn * TURN_PWM_MAX;
+    右后 =  turn * TURN_PWM_MAX;
+
+如果方向反了，不要先改滤波算法，优先交换电机正负号。
+
+
+七、转90度不准时怎么调
+------------------------------------------------------------
+1. 经常转过头，例如目标90，实际95~100：
+
+    icm20602_filter_yaw_turn_set_param(0.025f, 0.016f, 0.55f, 0.15f, 1.5f, 6.0f);
+
+说明：减小 kp、增大 kd、减小最大输出，让小车提前刹车。
+
+2. 经常转不到，例如目标90，实际84~86：
+
+    icm20602_filter_yaw_turn_set_param(0.035f, 0.010f, 0.70f, 0.22f, 1.0f, 5.0f);
+
+说明：增大 kp、增大最小输出，让电机尾段不要停得太早。
+
+3. 静止时Yaw漂移明显：
+
+    icm20602_filter_set_yaw_opt(0.80f, 0.00060f, 1);
+
+4. 慢速转弯被“吃掉”，Yaw不怎么变化：
+
+    icm20602_filter_set_yaw_opt(0.45f, 0.00045f, 1);
+
+5. 固定比例误差，例如真实90，显示86：
+
+    icm20602_filter_set_yaw_scale(90.0f / 86.0f);
+
+
+八、产品级使用注意事项
+------------------------------------------------------------
+1. 上电校准时，小车必须静止。
+2. icm20602_filter_update() 必须固定周期调用，推荐5ms。
+3. 屏幕刷新、串口打印、电机控制不要影响滤波周期。
+4. Yaw只能短时间相对稳定，长期绝对航向需要编码器、磁力计、视觉或外部定位融合。
+5. 小车震动大时，优先做机械减震：IMU螺丝固定、泡棉减震、远离电机和大电流线。
+6. 电机PWM不要太猛，转90度最好用闭环减速，不要用延时开环转弯。

@@ -1,0 +1,10 @@
+本版本在 main.c 中额外显式加入：
+#include "zf_device_icm20602.h"
+
+如果仍然出现 icm20602_init/icm20602_get_acc_gyro 未声明：
+1. 检查 libraries/zf_device/ 下是否存在 zf_device_icm20602.h 与 zf_device_icm20602.c。
+2. 检查 Keil 工程中是否添加了 zf_device_icm20602.c。
+3. 检查 Options for Target -> C/C++ -> Include Paths 中是否包含 ..\..\libraries\zf_device。
+4. 重新 Clean/Rebuild，避免 Keil 使用旧缓存。
+
+如果出现 undefined symbol icm20602_xxx，则说明头文件已经包含成功，但 zf_device_icm20602.c 没有加入工程，需要手动 Add Existing Files。

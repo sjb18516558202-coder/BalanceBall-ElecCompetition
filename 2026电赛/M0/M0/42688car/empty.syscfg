@@ -1,0 +1,243 @@
+/**
+ * 42688car 硬件配置文件。
+ *
+ * Target: LP_MSPM0G3507, CCS + SysConfig.
+ *
+ * @cliArgs --device "MSPM0G350X" --part "Default" --package "LQFP-64(PM)" --product "mspm0_sdk@2.05.01.00"
+ * @v2CliArgs --device "MSPM0G3507" --package "LQFP-64(PM)" --product "mspm0_sdk@2.05.01.00"
+ * @versions {"tool":"1.24.0+4110"}
+ */
+
+/**
+ * 导入本工程用到的 SysConfig 模块。
+ */
+const Board   = scripting.addModule("/ti/driverlib/Board", {}, false);
+const GPIO    = scripting.addModule("/ti/driverlib/GPIO", {}, false);
+const PWM     = scripting.addModule("/ti/driverlib/PWM", {}, false);
+const QEI     = scripting.addModule("/ti/driverlib/QEI", {}, false);
+const COMPARE = scripting.addModule("/ti/driverlib/COMPARE", {}, false);
+const SPI     = scripting.addModule("/ti/driverlib/SPI", {}, false);
+const TIMER   = scripting.addModule("/ti/driverlib/TIMER", {}, false);
+const UART    = scripting.addModule("/ti/driverlib/UART", {}, false);
+const SYSCTL  = scripting.addModule("/ti/driverlib/SYSCTL");
+
+/**
+ * 系统时钟：沿用原工程 80 MHz 高速配置。
+ */
+SYSCTL.clockTreeEn = true;
+SYSCTL.forceDefaultClkConfig = true;
+system.clockTree["PLL_CLK2X_DIV"].divideValue = 4;
+system.clockTree["PLL_PDIV"].divideValue = 2;
+system.clockTree["UDIV"].divideValue = 2;
+system.clockTree["PLL_QDIV"].multiplyValue = 10;
+system.clockTree["HSCLKMUX"].inputSelect = "HSCLKMUX_SYSPLL2X";
+
+/**
+ * 状态 LED。
+ */
+const GPIO_LED = GPIO.addInstance();
+GPIO_LED.$name = "GPIO_LED";
+GPIO_LED.associatedPins.create(1);
+GPIO_LED.associatedPins[0].$name = "PIN_LED";
+GPIO_LED.associatedPins[0].direction = "OUTPUT";
+GPIO_LED.associatedPins[0].initialValue = "CLEARED";
+GPIO_LED.associatedPins[0].assignedPort = "PORTA";
+GPIO_LED.associatedPins[0].assignedPin = "0";
+
+/**
+ * 三个独立按键，沿用原工程“上拉输入、按下为低电平”的接法。
+ *
+ * 原工程的 KEY3 使用 PB12，本工程 PB12 已经给 OLED_SCL 使用，
+ * 所以这里保留原工程里没有冲突的 PB21/PB15/PB19 三个按键脚。
+ */
+const GPIO_KEY = GPIO.addInstance();
+GPIO_KEY.$name = "GPIO_KEY";
+GPIO_KEY.associatedPins.create(3);
+GPIO_KEY.associatedPins[0].$name = "PIN_KEY_MODE";
+GPIO_KEY.associatedPins[0].direction = "INPUT";
+GPIO_KEY.associatedPins[0].internalResistor = "PULL_UP";
+GPIO_KEY.associatedPins[0].assignedPort = "PORTB";
+GPIO_KEY.associatedPins[0].assignedPin = "21";
+GPIO_KEY.associatedPins[1].$name = "PIN_KEY_START";
+GPIO_KEY.associatedPins[1].direction = "INPUT";
+GPIO_KEY.associatedPins[1].internalResistor = "PULL_UP";
+GPIO_KEY.associatedPins[1].assignedPort = "PORTB";
+GPIO_KEY.associatedPins[1].assignedPin = "15";
+GPIO_KEY.associatedPins[2].$name = "PIN_KEY_STOP";
+GPIO_KEY.associatedPins[2].direction = "INPUT";
+GPIO_KEY.associatedPins[2].internalResistor = "PULL_UP";
+GPIO_KEY.associatedPins[2].assignedPort = "PORTB";
+GPIO_KEY.associatedPins[2].assignedPin = "19";
+
+/**
+ * 电机方向控制脚，适配 TB6612/L298N 一类双 H 桥驱动。
+ */
+const GPIO_MOTOR_DIR = GPIO.addInstance();
+GPIO_MOTOR_DIR.$name = "GPIO_MOTOR_DIR";
+GPIO_MOTOR_DIR.associatedPins.create(4);
+GPIO_MOTOR_DIR.associatedPins[0].$name = "PIN_LEFT_IN1";
+GPIO_MOTOR_DIR.associatedPins[0].direction = "OUTPUT";
+GPIO_MOTOR_DIR.associatedPins[0].initialValue = "CLEARED";
+GPIO_MOTOR_DIR.associatedPins[0].assignedPort = "PORTA";
+GPIO_MOTOR_DIR.associatedPins[0].assignedPin = "22";
+GPIO_MOTOR_DIR.associatedPins[1].$name = "PIN_LEFT_IN2";
+GPIO_MOTOR_DIR.associatedPins[1].direction = "OUTPUT";
+GPIO_MOTOR_DIR.associatedPins[1].initialValue = "CLEARED";
+GPIO_MOTOR_DIR.associatedPins[1].assignedPort = "PORTA";
+GPIO_MOTOR_DIR.associatedPins[1].assignedPin = "12";
+GPIO_MOTOR_DIR.associatedPins[2].$name = "PIN_RIGHT_IN1";
+GPIO_MOTOR_DIR.associatedPins[2].direction = "OUTPUT";
+GPIO_MOTOR_DIR.associatedPins[2].initialValue = "CLEARED";
+GPIO_MOTOR_DIR.associatedPins[2].assignedPort = "PORTA";
+GPIO_MOTOR_DIR.associatedPins[2].assignedPin = "17";
+GPIO_MOTOR_DIR.associatedPins[3].$name = "PIN_RIGHT_IN2";
+GPIO_MOTOR_DIR.associatedPins[3].direction = "OUTPUT";
+GPIO_MOTOR_DIR.associatedPins[3].initialValue = "CLEARED";
+GPIO_MOTOR_DIR.associatedPins[3].assignedPort = "PORTA";
+GPIO_MOTOR_DIR.associatedPins[3].assignedPin = "15";
+
+/**
+ * 右编码器 B 相。右编码器 A 相由 TIMG6 边沿计数模式采集。
+ */
+const GPIO_ENCODER_RIGHT = GPIO.addInstance();
+GPIO_ENCODER_RIGHT.$name = "GPIO_ENCODER_RIGHT";
+GPIO_ENCODER_RIGHT.associatedPins.create(1);
+GPIO_ENCODER_RIGHT.associatedPins[0].$name = "PIN_RIGHT_ENCODER_B";
+GPIO_ENCODER_RIGHT.associatedPins[0].direction = "INPUT";
+GPIO_ENCODER_RIGHT.associatedPins[0].internalResistor = "PULL_UP";
+GPIO_ENCODER_RIGHT.associatedPins[0].assignedPort = "PORTB";
+GPIO_ENCODER_RIGHT.associatedPins[0].assignedPin = "3";
+
+/**
+ * ICM-42688 片选脚。SPI 的 SCLK/MOSI/MISO 在下方 SPI 模块中配置。
+ */
+const GPIO_IMU = GPIO.addInstance();
+GPIO_IMU.$name = "GPIO_IMU";
+GPIO_IMU.associatedPins.create(1);
+GPIO_IMU.associatedPins[0].$name = "PIN_IMU_CS";
+GPIO_IMU.associatedPins[0].direction = "OUTPUT";
+GPIO_IMU.associatedPins[0].initialValue = "SET";
+GPIO_IMU.associatedPins[0].assignedPort = "PORTA";
+GPIO_IMU.associatedPins[0].assignedPin = "2";
+
+/**
+ * OLED 软件 I2C 引脚。
+ *
+ * 原工程 OLED 使用 PB2/PB3。本工程 PB2/PB3 已分配给右编码器，
+ * 所以 OLED 改到 PB12/PB13，避免硬件冲突。
+ */
+const GPIO_OLED = GPIO.addInstance();
+GPIO_OLED.$name = "GPIO_OLED";
+GPIO_OLED.associatedPins.create(2);
+GPIO_OLED.associatedPins[0].$name = "PIN_OLED_SCL";
+GPIO_OLED.associatedPins[0].direction = "OUTPUT";
+GPIO_OLED.associatedPins[0].initialValue = "SET";
+GPIO_OLED.associatedPins[0].assignedPort = "PORTB";
+GPIO_OLED.associatedPins[0].assignedPin = "12";
+GPIO_OLED.associatedPins[1].$name = "PIN_OLED_SDA";
+GPIO_OLED.associatedPins[1].direction = "OUTPUT";
+GPIO_OLED.associatedPins[1].initialValue = "SET";
+GPIO_OLED.associatedPins[1].assignedPort = "PORTB";
+GPIO_OLED.associatedPins[1].assignedPin = "13";
+
+/**
+ * 电机 PWM：TIMA0 CH0/CH1。
+ */
+const PWM_MOTOR = PWM.addInstance();
+PWM_MOTOR.$name = "PWM_MOTOR";
+PWM_MOTOR.timerStartTimer = true;
+PWM_MOTOR.ccIndex = [0, 1];
+PWM_MOTOR.timerCount = 1600;
+PWM_MOTOR.clockPrescale = 2;
+PWM_MOTOR.PWM_CHANNEL_0.$name = "PWM_LEFT";
+PWM_MOTOR.PWM_CHANNEL_0.dutyCycle = 0;
+PWM_MOTOR.PWM_CHANNEL_1.$name = "PWM_RIGHT";
+PWM_MOTOR.PWM_CHANNEL_1.dutyCycle = 0;
+PWM_MOTOR.peripheral.$assign = "TIMA0";
+PWM_MOTOR.peripheral.ccp0Pin.$assign = "PB8";
+PWM_MOTOR.peripheral.ccp1Pin.$assign = "PB20";
+
+/**
+ * 左编码器：真正的定时器 QEI 模式。MSPM0G3507 的 SysConfig 只开放 1 路 QEI。
+ */
+const QEI_LEFT = QEI.addInstance();
+QEI_LEFT.$name = "QEI_LEFT";
+QEI_LEFT.timerStartTimer = true;
+QEI_LEFT.loadValue = 65535;
+QEI_LEFT.peripheral.$assign = "TIMG8";
+QEI_LEFT.peripheral.ccp0Pin.$assign = "PA29";
+QEI_LEFT.peripheral.ccp1Pin.$assign = "PA30";
+
+/**
+ * 右编码器：TIMG6 比较边沿计数模式采集 A 相。
+ * 方向通过 GPIO PIN_RIGHT_ENCODER_B 采样推断。
+ */
+const ENCODER_RIGHT_COUNT = COMPARE.addInstance();
+ENCODER_RIGHT_COUNT.$name = "ENCODER_RIGHT_COUNT";
+ENCODER_RIGHT_COUNT.timerPeriod = 65535;
+ENCODER_RIGHT_COUNT.peripheral.$assign = "TIMG6";
+ENCODER_RIGHT_COUNT.peripheral.ccp0Pin.$assign = "PB2";
+
+/**
+ * ICM-42688 SPI 总线。片选由 PIN_IMU_CS 手动控制。
+ */
+const SPI_IMU = SPI.addInstance();
+SPI_IMU.$name = "SPI_IMU";
+SPI_IMU.mode = "CONTROLLER";
+SPI_IMU.frameFormat = "MOTO3";
+SPI_IMU.polarity = "0";
+SPI_IMU.phase = "0";
+SPI_IMU.bitOrder = "MSB";
+SPI_IMU.dataSize = 8;
+SPI_IMU.targetBitRate = 8000000;
+SPI_IMU.chipSelect = [];
+SPI_IMU.peripheral.$assign = "SPI0";
+SPI_IMU.peripheral.sclkPin.$assign = "PA6";
+SPI_IMU.peripheral.mosiPin.$assign = "PA5";
+SPI_IMU.peripheral.misoPin.$assign = "PA4";
+
+/**
+ * 10 ms 控制周期定时器。
+ */
+const CONTROL_TIMER = TIMER.addInstance();
+CONTROL_TIMER.$name = "CONTROL_TIMER";
+CONTROL_TIMER.timerMode = "PERIODIC";
+CONTROL_TIMER.timerPeriod = "10ms";
+CONTROL_TIMER.timerClkDiv = 8;
+CONTROL_TIMER.timerClkPrescale = 40;
+CONTROL_TIMER.timerStartTimer = true;
+CONTROL_TIMER.interrupts = ["ZERO"];
+CONTROL_TIMER.peripheral.$assign = "TIMA1";
+
+/**
+ * UART_0：调试/上位机串口。
+ */
+const UART_0 = UART.addInstance();
+UART_0.$name = "UART_0";
+UART_0.targetBaudRate = 115200;
+UART_0.enabledInterrupts = ["RX"];
+UART_0.peripheral.$assign = "UART0";
+UART_0.peripheral.txPin.$assign = "PA10";
+UART_0.peripheral.rxPin.$assign = "PA11";
+
+/**
+ * UART_1：外部模块串口。
+ */
+const UART_1 = UART.addInstance();
+UART_1.$name = "UART_1";
+UART_1.targetBaudRate = 115200;
+UART_1.enabledInterrupts = ["RX"];
+UART_1.peripheral.$assign = "UART1";
+UART_1.peripheral.txPin.$assign = "PB6";
+UART_1.peripheral.rxPin.$assign = "PB7";
+
+/**
+ * UART_2：备用串口，引脚沿用原工程 WIT 串口。
+ */
+const UART_2 = UART.addInstance();
+UART_2.$name = "UART_2";
+UART_2.targetBaudRate = 115200;
+UART_2.enabledInterrupts = ["RX"];
+UART_2.peripheral.$assign = "UART2";
+UART_2.peripheral.txPin.$assign = "PB17";
+UART_2.peripheral.rxPin.$assign = "PB16";

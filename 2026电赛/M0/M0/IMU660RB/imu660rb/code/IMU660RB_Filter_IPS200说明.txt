@@ -1,0 +1,51 @@
+IMU660RB 滤波 + IPS200 显示版本说明
+
+一、主要修改
+1. 新增 user/inc/imu660rb_filter.h
+2. 新增 user/src/imu660rb_filter.c
+3. 修改 user/src/main.c
+4. 已在 keil/SeekFree_MSPM0G3507_Device_Library.uvprojx 中加入 imu660rb_filter.c 和 imu660rb_filter.h
+
+二、初始化流程
+main.c 中流程为：
+1. clock_init(SYSTEM_CLOCK_80M)
+2. debug_init()
+3. ips200_init(IPS200_TYPE_SPI)
+4. imu660rb_init()
+5. imu660rb_filter_init()
+6. 小车静止，imu660rb_filter_calibrate(800) 做约 4 秒零偏校准
+7. pit_ms_init(PIT_TIM_G0, 5ms, imu660rb_filter_timer_callback, NULL)
+8. 主循环只负责屏幕显示和串口打印
+
+三、屏幕显示内容
+IPS200 横屏显示：
+Roll   ：车身横滚角，单位 °
+Pitch  ：车身俯仰角，单位 °
+Yaw    ：平装小车 Z 轴积分角度，转 90 度主要看这个
+Gx/Gy/Gz：滤波、零偏补偿后的三轴角速度，单位 °/s
+Err/Out ：预留给转 90 度闭环控制调试
+State  ：STOP/MOVE/VIB，分别表示静止、运动、震动/冲击
+ALG    ：M+KF/MADG/MAHO，当前姿态融合模式
+
+四、滤波框架
+该版本按原 ICM20602 滤波版本移植到 IMU660RB：
+1. 上电静止零偏校准
+2. 三点中值滤波，抑制尖峰
+3. 自适应低通滤波，震动时自动降低截止频率
+4. 静止零角速度更新，降低停车漂移
+5. Mahony / Madgwick / Mahony+Kalman 三种模式，默认 Mahony+Kalman
+6. 平装小车专用 Z 轴 Yaw 积分，加入死区、静止锁定、在线零偏学习
+
+五、Yaw 调参位置
+1. 如果实际转 90°，屏幕只显示 88°：
+   在校准后调用：imu660rb_filter_set_yaw_scale(90.0f / 88.0f);
+   或者修改 imu660rb_filter.c 中 yaw_scale 默认值。
+
+2. 如果停车时 yaw 慢慢漂：
+   调大死区，例如：imu660rb_filter_set_yaw_opt(0.80f, 0.00045f, 1);
+
+3. 如果慢速转弯时角度被吃掉：
+   适当调小死区，例如：imu660rb_filter_set_yaw_opt(0.45f, 0.00030f, 1);
+
+六、注意
+IMU660RB 官方驱动当前只开放加速度和陀螺仪读取，没有封装温度寄存器，所以本滤波文件中温度固定按 25℃ 处理。零偏校准、滤波和 yaw 积分不受影响。若后续需要温漂补偿，可以在 zf_device_imu660rb.c 中增加温度读取，再替换 imu660rb_get_temperature_c()。

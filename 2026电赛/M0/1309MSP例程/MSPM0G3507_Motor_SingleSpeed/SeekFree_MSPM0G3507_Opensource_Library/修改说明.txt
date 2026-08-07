@@ -1,0 +1,36 @@
+本次修改说明
+
+1. 修改 project/code/motorsetspeed.c
+   - 优化 Motor_Set_Speeds()，负数速度先转 uint16_t 再拆字节，发送更稳定。
+   - 新增 motor_speed_cache[4]，保存 4 个电机当前目标速度。
+   - 新增 Motor_Set_One_Speed(uint8_t motor_id, int16_t speed)：按 0/1/2/3 单独设置某个电机。
+   - 新增 Motor_Set_One_Speed_By_Number(uint8_t motor_num, int16_t speed)：按 1/2/3/4 单独设置某个电机，推荐日常使用。
+   - 新增 Motor_Stop_All(void)：停止全部电机。
+   - 新增 Motor_Get_One_Speed(uint8_t motor_id)：读取当前目标速度缓存。
+   - 代码中加入中文注释和调用例子。
+
+2. 修改 project/code/motorsetspeed.h
+   - 补充所有电机控制函数声明。
+   - 给每个函数加入中文用途、参数说明和调用例子。
+
+3. 修改 project/code/motorcrc.h / motorcrc.c
+   - 给 CRC16() 增加中文说明和调用例子。
+
+4. 修改 project/user/src/main.c
+   - 改为使用 Motor_Set_One_Speed_By_Number(2, 20)，演示“单独设置第 2 个电机速度”。
+   - main.c 中加入中文调用教程。
+
+5. 新增 project/code/Motor_Call_Guide_CN.md
+   - 详细中文调用教程，包含初始化、同时设置 4 个电机、单独设置某个电机、停止电机、PID 设置等。
+
+常用调用方式：
+
+Motor_Set_Speeds(0, 20, 0, 0);              // 只让第 2 个电机速度为 20
+Motor_Set_One_Speed_By_Number(2, 20);       // 同上，推荐写法
+Motor_Set_One_Speed(1, 20);                 // 同上，编号从 0 开始
+Motor_Stop_All();                           // 停止全部电机
+
+注意：
+- Motor_Set_One_Speed_By_Number() 的电机编号是 1~4。
+- Motor_Set_One_Speed() 的电机编号是 0~3。
+- 正负号表示方向，如果方向不对，可以先把速度取反测试。
