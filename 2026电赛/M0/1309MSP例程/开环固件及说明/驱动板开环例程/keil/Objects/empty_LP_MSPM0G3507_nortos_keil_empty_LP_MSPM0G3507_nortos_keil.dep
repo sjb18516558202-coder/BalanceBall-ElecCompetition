@@ -1,17 +1,0 @@
-Dependencies for Project 'empty_LP_MSPM0G3507_nortos_keil', Target 'empty_LP_MSPM0G3507_nortos_keil': (DO NOT MODIFY !)
-CompilerVersion: 5060750::V5.06 update 6 (build 750)::..\..\..\..\..\..\Keil_v5\ARM\ARMCC
-F (../empty.c)(0x69C51CE4)(--c99 -c --cpu Cortex-M0+ -g -O0 --apcs=interwork --split_sections -I ../../../../../../source/third_party/CMSIS/Core/Include -I ../../../../../../source -I ..\..\MSP_Motor_Ctl -I ..\MSP_Motor_Ctrl-D__UVISION_VERSION="543" -D__MSPM0G3507__ -D__MSPM0G3507__-o .\objects\empty.o --omf_browse .\objects\empty.crf --depend .\objects\empty.d)
-I (..\ti_msp_dl_config.h)(0x699FBFC2)
-F (../empty.syscfg)(0x699FBFB1)()
-F (startup_mspm0g350x_uvision.s)(0x69C51BB0)(--cpu Cortex-M0+ -g --apcs=interwork --pd "__UVISION_VERSION SETA 543" --pd "__MSPM0G3507__ SETA 1"--list .\startup_mspm0g350x_uvision.lst --xref -o .\objects\startup_mspm0g350x_uvision.o --depend .\objects\startup_mspm0g350x_uvision.d)
-F (../ti_msp_dl_config.h)(0x699FBFC2)()
-F (../ti_msp_dl_config.c)(0x699FBFC2)(--c99 -c --cpu Cortex-M0+ -g -O0 --apcs=interwork --split_sections -I ../../../../../../source/third_party/CMSIS/Core/Include -I ../../../../../../source -I ..\..\MSP_Motor_Ctl -I ..\MSP_Motor_Ctrl-D__UVISION_VERSION="543" -D__MSPM0G3507__ -D__MSPM0G3507__-o .\objects\ti_msp_dl_config.o --omf_browse .\objects\ti_msp_dl_config.crf --depend .\objects\ti_msp_dl_config.d)
-I (../ti_msp_dl_config.h)(0x699FBFC2)
-F (..\MSP_Motor_Ctrl\motor_crc.c)(0x699E811C)(--c99 -c --cpu Cortex-M0+ -g -O0 --apcs=interwork --split_sections -I ../../../../../../source/third_party/CMSIS/Core/Include -I ../../../../../../source -I ..\..\MSP_Motor_Ctl -I ..\MSP_Motor_Ctrl-D__UVISION_VERSION="543" -D__MSPM0G3507__ -D__MSPM0G3507__-o .\objects\motor_crc.o --omf_browse .\objects\motor_crc.crf --depend .\objects\motor_crc.d)
-I (..\MSP_Motor_Ctrl\motor_crc.h)(0x699E811C)
-F (..\MSP_Motor_Ctrl\motor_read_enc.c)(0x69C51CC8)(--c99 -c --cpu Cortex-M0+ -g -O0 --apcs=interwork --split_sections -I ../../../../../../source/third_party/CMSIS/Core/Include -I ../../../../../../source -I ..\..\MSP_Motor_Ctl -I ..\MSP_Motor_Ctrl-D__UVISION_VERSION="543" -D__MSPM0G3507__ -D__MSPM0G3507__-o .\objects\motor_read_enc.o --omf_browse .\objects\motor_read_enc.crf --depend .\objects\motor_read_enc.d)
-I (..\MSP_Motor_Ctrl\motor_Read_enc.h)(0x699E83B7)
-F (..\MSP_Motor_Ctrl\motor_set_speed.c)(0x69C51C41)(--c99 -c --cpu Cortex-M0+ -g -O0 --apcs=interwork --split_sections -I ../../../../../../source/third_party/CMSIS/Core/Include -I ../../../../../../source -I ..\..\MSP_Motor_Ctl -I ..\MSP_Motor_Ctrl-D__UVISION_VERSION="543" -D__MSPM0G3507__ -D__MSPM0G3507__-o .\objects\motor_set_speed.o --omf_browse .\objects\motor_set_speed.crf --depend .\objects\motor_set_speed.d)
-I (..\MSP_Motor_Ctrl\motor_set_speed.h)(0x69C51C41)
-F (..\MSP_Motor_Ctrl\user.c)(0x69C4E985)(--c99 -c --cpu Cortex-M0+ -g -O0 --apcs=interwork --split_sections -I ../../../../../../source/third_party/CMSIS/Core/Include -I ../../../../../../source -I ..\..\MSP_Motor_Ctl -I ..\MSP_Motor_Ctrl-D__UVISION_VERSION="543" -D__MSPM0G3507__ -D__MSPM0G3507__-o .\objects\user.o --omf_browse .\objects\user.crf --depend .\objects\user.d)
-I (..\MSP_Motor_Ctrl\user.h)(0x698F3CDD)

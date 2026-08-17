@@ -1,3 +1,0 @@
-odometry.o: ..\odometry.c ..\odometry.h ..\app_config.h
-..\odometry.h:
-..\app_config.h:

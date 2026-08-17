@@ -1,9 +1,0 @@
-control.o: ..\control.c ..\control.h ..\odometry.h ..\app_config.h \
-  ..\encoder.h ..\icm42688.h ..\motor.h ..\pid.h
-..\control.h:
-..\odometry.h:
-..\app_config.h:
-..\encoder.h:
-..\icm42688.h:
-..\motor.h:
-..\pid.h:
